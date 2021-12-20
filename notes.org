@@ -10,3 +10,4 @@
 * Day 02
   In the previous problem, when trying to read numbers sequentially, I did ~filestream >> num~. I want to do this for a complicated data structure ~filestream >> data~. What should I define for this to work?
   <2021-12-19 Sun> Got it to work. There is a bug. If the eof does not occur directly after the data, i.e., there is an extra newline, [[file:src/day02.cc::std::list<struct command> read_commands(std::string filename) {][~read_commands~]], then the program crashes trying to parse this whitespace into a ~struct command~. Now how do I tell if all that is left in the stream is whitespace?
+  <2021-12-20 Mon> Solved the whitespace before eof problem by just ~peek~ and ~get~ while the ~peek~ satisfies ~isspace~.

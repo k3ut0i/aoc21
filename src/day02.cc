@@ -41,8 +41,52 @@ std::list<struct command> read_commands(std::string filename) {
     struct command c;
     s >> c;
     l.push_back(c);
+    while(isspace(s.peek())) { // So that >> doesn't choke on whitespace
+    s.get();
+    }
   }
+
   return l;
+}
+
+std::pair<int, int> find_pos(std::list<struct command> cl) {
+  int x = 0;
+  int y = 0;
+  for (auto c : cl) {
+    switch (c.type) {
+    case forward:
+      x += c.magnitude;
+      break;
+    case up:
+      y += c.magnitude;
+      break;
+    case down:
+      y -= c.magnitude;
+      break;
+    }
+  }
+  return std::pair<int, int>(x, y);
+}
+
+std::pair<int, int> find_pos2(std::list<struct command> cl) {
+  int x = 0;
+  int y = 0;
+  int aim = 0;
+    for (auto c : cl) {
+    switch (c.type) {
+    case forward:
+      x += c.magnitude;
+      y -= aim * c.magnitude;
+      break;
+    case up:
+      aim -= c.magnitude;
+      break;
+    case down:
+      aim += c.magnitude;
+      break;
+    }
+  }
+  return std::pair<int, int>(x, y);
 }
 
 int main(int argc, char* argv[]) {
@@ -51,9 +95,15 @@ int main(int argc, char* argv[]) {
     return -1;
   }
   std::list<struct command> cl = read_commands(argv[1]);
-  for (auto c: cl) {
-    std::cout << c.type << " " << c.magnitude << std::endl;
-  }
+  // for (auto c: cl) {
+  //   std::cout << c.type << " " << c.magnitude << std::endl;
+  // }
+  auto pos = find_pos(cl);
+  std::cout << pos.first << "," << pos.second << " : "
+	    << pos.first * (- pos.second)<< std::endl;
+  auto pos2 = find_pos2(cl);
+  std::cout << pos2.first << "," << pos2.second << " : "
+	    << pos2.first * (- pos2.second)<< std::endl;
   return 0;
 }
 
