@@ -24,3 +24,8 @@
     + figured it out. I should have passed ranged over state using ~auto &~. By just using ~auto~ I was not propagating changes back to state.
   - Similar to previous day, I seem to be struggling with deleting nodes of a list while traversing it.
   I would not have struggled this much if I just tried to simulate the whole process of find the last card in my head.
+  
+* Day 05
+  Finding the density of lines.
+  - I am loving the ~operator>>~ to parse the incoming data. Feels quite like Haskell ~ReadS~ parsing.
+  - Took a couple of tries to get the line stepping logic to get right.
