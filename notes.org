@@ -17,3 +17,10 @@
   I did not use any ~lambdas~. There are instances to use ~map~ on ~std::list~, but I seem to be just using ~for~ loops.
   <2021-12-20 Mon> Something is segfaulting in part2; probably some dereferencing a bitset.
   <2021-12-21 Tue> I was deleting nodes in a list while traversing. So when I deleted a node and then used it to get the next node, the result was a segfault.
+
+* DONE Day 04
+  Finished coding the logic. Cards are not being marked at all. Needs debugging.
+  - The set of marked indices is not being updated. What am I missing?
+    + figured it out. I should have passed ranged over state using ~auto &~. By just using ~auto~ I was not propagating changes back to state.
+  - Similar to previous day, I seem to be struggling with deleting nodes of a list while traversing it.
+  I would not have struggled this much if I just tried to simulate the whole process of find the last card in my head.
