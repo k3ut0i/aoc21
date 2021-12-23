@@ -25,7 +25,13 @@
   - Similar to previous day, I seem to be struggling with deleting nodes of a list while traversing it.
   I would not have struggled this much if I just tried to simulate the whole process of find the last card in my head.
   
-* Day 05
+* DONE Day 05
   Finding the density of lines.
   - I am loving the ~operator>>~ to parse the incoming data. Feels quite like Haskell ~ReadS~ parsing.
   - Took a couple of tries to get the line stepping logic to get right.
+
+* TODO Day 06
+  I am having trouble using header files and libraries.
+  - linker is complaining of unable to resolve the function reference. Is there a problem with function name or template instantiation?
+    + I almost stumbled upon the answer. Since a templated function compiled into instantiated versions where it is required, we need to know it's uses before compiling the object file. Thus we can only use it if the definition is within the translation unit of it's use. We can do this if the function is defined within the header file. We cannot enumerate all instances of template function; thus every instantiation might be compiled again anyway. So this is not much of a disadvantage to the compilaiton process.
+  For the second part, I tried to find a equation to describe the process similar to fibonacci rabbits which I remembered from [[rosalind.info]]. I did not succeed. Since fish that are on the same reproductive cycle behave the same, we can just keep track of one and keep a count of how many there are.

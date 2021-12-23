@@ -6,3 +6,5 @@ src/day01
 /src/day04
 /.ccls-cache/
 /src/day05
+/src/*.o
+/src/day06
