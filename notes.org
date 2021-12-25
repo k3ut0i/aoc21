@@ -30,8 +30,16 @@
   - I am loving the ~operator>>~ to parse the incoming data. Feels quite like Haskell ~ReadS~ parsing.
   - Took a couple of tries to get the line stepping logic to get right.
 
-* TODO Day 06
+* DONE Day 06
   I am having trouble using header files and libraries.
   - linker is complaining of unable to resolve the function reference. Is there a problem with function name or template instantiation?
     + I almost stumbled upon the answer. Since a templated function compiled into instantiated versions where it is required, we need to know it's uses before compiling the object file. Thus we can only use it if the definition is within the translation unit of it's use. We can do this if the function is defined within the header file. We cannot enumerate all instances of template function; thus every instantiation might be compiled again anyway. So this is not much of a disadvantage to the compilaiton process.
   For the second part, I tried to find a equation to describe the process similar to fibonacci rabbits which I remembered from [[rosalind.info]]. I did not succeed. Since fish that are on the same reproductive cycle behave the same, we can just keep track of one and keep a count of how many there are.
+
+* DONE Day 07
+  Main idea is to sort the positions and iterate from one end to the other. If we are at a position Pc and PL, PR are positions left and right of Pc. The fuel cost for Pc is sum(PR)-size(PR)*Pc + size(PL)*Pc-sum(PL).
+  I need to keep track of these sections properly.
+  Since in the above equation we have the only variable quantity as (size(PL) - size(PR))*Pc, this part has maximum and minimum only at the boundaries. Thus we only need to consider the positions given. It will never be inbetween.
+  The total sum(PR)+sum(PL)+sum(Current) must be constant; and size(PL)+size(PR)+1 must be the total size. These invariants should help manage all the variables.
+  <2021-12-25 Sat> After struggling with this a while, I just went with a brute force solution. It is O(n^2) rather that O(nlogn) but the N is small enough so runtime does not really matter. But I do feel defeated.
+  For the second part the cost function is quadratic w.r.t the distance. Hence the optimal position is not at the ends but in between the nodes. So I am iterating every point in range.
