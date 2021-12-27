@@ -9,3 +9,5 @@ src/day01
 /src/*.o
 /src/day06
 /src/day07
+/src/day08
+/src/day09
