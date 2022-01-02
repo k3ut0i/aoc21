@@ -68,3 +68,7 @@
 * TODO Day 10
   I used a stack to track the open characters. If the closing char doesn't match the top open char on the stack then it is corrupt. If there are still open chars left in the stack after the input if over then it is incomplete. So we can get all requirements in one iteration of the input line.
   <2022-01-02 Sun> For some reason the second part is giving me an incorrect answer, despite the given example working perfectly.
+
+* Day 11
+  Since both test case and actual input have 10x10 grids, I will just hand code it into the answer rather than try to figure it out from the file.
+  Simultaneous flashing was a bit tricky to get right. I again used a stack to keep track of neighbours who might flash. No wonder a stack is always suggested for depth first search problems. It makes the mental model very clear. 
