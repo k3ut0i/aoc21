@@ -57,10 +57,14 @@
 ** TODO Optimal solution
    Must atleast try a optimal solution. I always try to skirt around implementing a backtracking search in imperative languages.
 
-* TODO Day 09
+* DONE Day 09
   First part is simple enough. Iterate over every cell and check some property.
   Second part is something new. I need to start with a deep point and keep marking the basin untill all boundaries are reached. It is like finding connect components of a given graph
   - The neighbours closure is was very buggy.
   <2022-01-02 Sun> Finally debugged this. This is the same transitive closure problem that is disguised using depths that do not really matter. I generate a simple image to visualize the regions a bit too.
   #+NAME: basins-grayscale-colored
   [[./gen/day09_basins.pgm]]
+
+* TODO Day 10
+  I used a stack to track the open characters. If the closing char doesn't match the top open char on the stack then it is corrupt. If there are still open chars left in the stack after the input if over then it is incomplete. So we can get all requirements in one iteration of the input line.
+  <2022-01-02 Sun> For some reason the second part is giving me an incorrect answer, despite the given example working perfectly.
