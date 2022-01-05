@@ -69,6 +69,25 @@
   I used a stack to track the open characters. If the closing char doesn't match the top open char on the stack then it is corrupt. If there are still open chars left in the stack after the input if over then it is incomplete. So we can get all requirements in one iteration of the input line.
   <2022-01-02 Sun> For some reason the second part is giving me an incorrect answer, despite the given example working perfectly.
 
-* Day 11
+* DONE Day 11
   Since both test case and actual input have 10x10 grids, I will just hand code it into the answer rather than try to figure it out from the file.
   Simultaneous flashing was a bit tricky to get right. I again used a stack to keep track of neighbours who might flash. No wonder a stack is always suggested for depth first search problems. It makes the mental model very clear. 
+
+* TODO Day 12
+  An exhaustive path search problem with a twist.
+  - There are two kinds of nodes: small, large.
+  - small must be visited atmost once, large can be visited any number of times.
+
+  So If two large nodes are directly connected we have a loop and hence it will result in infinite number of paths. So input will not contain two large nodes connected.
+  The search space could be massive, hence I should try to an /orderly/ sweep and keep a record of choice points at each node and by backtracking we can get all the paths.
+
+  <2022-01-04 Tue> +Choices should not be a stack, it should be a map. The partial path should be tracked by a stack separately, otherwise updating the choices state at each node will be cumbersome.+
+  <2022-01-05 Wed> The ~<algorithm>~ library is not easy to use. Parts of it are in C++14, C++17 and C++20. Some of them work by default on one compiler and some work with only specific flags enabled and some do not work at all.
+  #+begin_example
+    Old value = std::set with 4 elements = {[0] = "b", [1] = "c", [2] = "end", [3] = <error: Cannot access memory at address 0x4>}
+    New value = std::set with 4 elements = {[0] = "b", [1] = "c", [2] = "end", [3] = <error: Cannot access memory at address 0x4>}
+  #+end_example
+  Why is get_vals returing a set with 4 elements when looking at choices for "A"?
+  I made a mistake in choosing to represent Choices as a map. Since the nodes on the path are can be repeated, at each point we might have different choices. If we reach 'A' two times in the path, we will have different choices in those to instances.
+  What a mess. I should have just used a list to maintain a path with choices data attached to each node. Wasted trying stack, map and multimap. I guess when exploring the problem space itself, it is better use as generic a method as possible. We can narrow and optimize after getting it to work.
+  Now the second part has a even bigger twist. Exactly one of the smaller nodes can be visited twice. Can I deal with this using code already written? i.e., can I add an extra dummy node for each case with same connections? Since the number of nodes are small, we can just try this method for each node and then count the paths.
