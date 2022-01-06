@@ -7,10 +7,10 @@
 #include <utility>
 #include <queue>
 #include <algorithm>
+
 using std::string;
 struct Graph {
   std::multimap<string, string> m;
-  std::set<string> nodes;
   template<class C, class T> Graph(std::basic_istream<C,T> &s){
     while(!s.eof()){
       string a; string b;
@@ -27,7 +27,6 @@ struct Graph {
       } 
       while(std::isspace(s.peek())) s.get(); // slurp preceding whitespace
       m.insert({{a, b}, {b, a}});
-      nodes.insert({a, b});
     }
   }
 };
@@ -65,7 +64,7 @@ small_caves(const std::list<std::pair<std::string, std::set<std::string>>>& c){
   return s;
 }
 
-uint count_paths(Graph g){
+uint count_paths(const Graph &g){
   using std::string; using std::pair; using std::list;
   using std::set;
   // state variables
@@ -79,12 +78,8 @@ uint count_paths(Graph g){
     if(c_node == "end") {
       count++;
       choices.erase(--choices.end());
-      // for(auto &p : choices)
-      // 	std::cout << p.first << " ";
-      // std::cout << std::endl;
     } else {
       if(c_choices.empty()) {
-
 	if (c_node == "start") break; // get out of while loop
 	else {
 	  choices.erase(--choices.end());
@@ -103,6 +98,54 @@ uint count_paths(Graph g){
   }
   return count;
 }
+uint count_paths2(const Graph &g){
+  using std::string; using std::pair; using std::list;
+  using std::set;
+  // state variables
+  uint count = 0;
+  list<pair<string,set<string>>> choices = {{"start", get_vals(g.m, string("start"))}};
+  // keep counting while choice points exist
+  while(!choices.empty()) {
+    auto c = choices.back();
+    string c_node = c.first;
+    set<string> c_choices = c.second;
+    if(c_node == "end") {
+      string path = "";
+      count++;
+      choices.erase(--choices.end());
+    } else {
+      if(c_choices.empty()) {
+	if (c_node == "start") break; // get out of while loop
+	else {
+	  choices.erase(--choices.end());
+	}
+      } else {
+	c_node = *c_choices.begin(); // get a choice
+	choices.back().second.erase(c_node); // and remove that
+	auto new_choices = get_vals(g.m, c_node);
+	new_choices.erase("start"); // Something very wrong going on without this.
+	std::map<string, uint> sc_count;
+	for(auto &p : choices) if(cave_small_p(p.first)) sc_count[p.first] = 0;
+	for(auto &p : choices) if(cave_small_p(p.first)) sc_count[p.first]++;
+	sc_count[c_node]++; // missed this at first;
+	bool twice = false;
+	for(auto &p : sc_count)
+	  if(p.second > 1) twice = true;
+	  else if(p.second > 2) throw std::runtime_error("Vistied small cave more than twice");
+	
+	if(twice) {
+	  list<set<string>::iterator> rm_nodes;
+	  for (auto i = new_choices.begin(); i != new_choices.end(); i++)
+	    if(small_caves(choices).count(*i) > 0) rm_nodes.push_back(i);
+	  for(auto &i : rm_nodes) new_choices.erase(i);
+	}
+	choices.push_back({c_node, new_choices});
+      }
+    }
+  }
+  return count;
+}
+
 
 int main(int argc, char* argv[]){
   if(argc != 2){
@@ -112,6 +155,7 @@ int main(int argc, char* argv[]){
   std::ifstream s(argv[1]);
   struct Graph g(s);
   std::cout << count_paths(g) << std::endl;
+  std::cout << count_paths2(g) << std::endl;
   return 0;
 }
 
