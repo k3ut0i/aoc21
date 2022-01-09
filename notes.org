@@ -94,7 +94,7 @@
   The above strategy will not work directly as the paths generated after adding extra node to the graph need no actually have the extra node. So we need to only count the extra paths if the extra node is in it. So we cannot just use part1 code directly. Some changes are needed.
   <2022-01-06 Thu> At every point of the path small caves will also be added to choice points unless a small cave has already been choosen.
   Found an error: _start kj dc HN kj dc end_ Why is this path being generated? When I select a new node, I am not considering it it already exists before deciding the choices. I am just checking the choices already made.
-  Finally leveraged most of the path finding code from part1 to solve part2 by just allowing small cave choices unless a repeat already happened. I can make it better by keeping a state variable of small cave choices instead of counting them every iteration. Too lazy to do it now.
+  Finally leveraged most of the path finding code from part1 to solve part2 by just allowing small cave choices unless a repeat already happened. I can make it better by keeping a state variable of small cave choices instead of counting them every iteration. Also count_paths2 can just be written with count_paths by toggling a input value or template value. Too lazy to do it now.
   #+begin_example
     4167
     98441
@@ -103,3 +103,6 @@
     user    0m7.438s
     sys     0m0.000s
   #+end_example
+
+* Day 13
+  A direct simulation. Started doing some object oriented stuff again. A class, constructor and methods on the simulated object. I used a ~const~ function qualified for the first time.
