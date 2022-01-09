@@ -36,7 +36,7 @@ tog::tog(const std::list<std::pair<uint, uint>>& points){
 uint tog::count_dots() const{
   uint count = 0;
   for(uint y = 0; y < height; y++)
-    for(uint x = 0; x < height; x++)
+    for(uint x = 0; x < width; x++)
       if(paper[y][x]) count++;
   return count;
 }
@@ -98,9 +98,11 @@ int main(int argc, char* argv[]){
   std::list<std::pair<bool, uint>> folds;
   read_input(s, points, folds);
   struct tog o(points);
-  for(auto &p : folds)
-    o.fold_along(p.first, p.second);
-  std::cout << o;
+  o.fold_along(folds.front().first, folds.front().second);
+  uint ans = o.count_dots();
+  for(auto p = folds.begin()++; p != folds.end(); p++)
+    o.fold_along(p->first, p->second);
+  std::cout << ans << std::endl << o;
   return 0;
 }
 

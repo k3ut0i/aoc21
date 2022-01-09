@@ -104,5 +104,18 @@
     sys     0m0.000s
   #+end_example
 
-* Day 13
+* DONE Day 13
   A direct simulation. Started doing some object oriented stuff again. A class, constructor and methods on the simulated object. I used a ~const~ function qualified for the first time.
+  #+begin_example
+    ..##..##...##....##.####.####.#..#.#..#.
+    ...#.#..#.#..#....#.#....#....#.#..#..#.
+    ...#.#....#..#....#.###..###..##...#..#.
+    ...#.#.##.####....#.#....#....#.#..#..#.
+    #..#.#..#.#..#.#..#.#....#....#.#..#..#.
+    .##...###.#..#..##..####.#....#..#..##..
+  #+end_example
+  
+* DONE Day 14
+  Solved the first part using a direct simulation. The second part requires more as the it is taking exponential time and memory. There are finite patterns here. Hence there will be big parts of the chain just repeating in time and space.
+  The polymer expansion is contained, i.e., an expansion only happens b/w two elements. Say there is a rule ~AB -> C~. Then ~AB~ transforms to ~ACB~. Thus if we take the whole string as a set of all successive two element pairs, then we can write this transformation as ~{AB}~ to ~{AC, CB}~. Since if only N elements are present we have to just keep track of N^2 pairs, we can iterate in constant space.
+  Ends of the polymer chain are proving a bit of problem for boundry conditions. I kept track of them and when took them into account when counting the characters.
