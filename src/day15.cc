@@ -4,7 +4,8 @@
 #include<list>
 #include<unordered_map>
 #include<unordered_set>
-
+#include<set>
+#include<queue>
 typedef unsigned int uint;
 typedef std::pair<uint, uint> point;
 
@@ -16,6 +17,7 @@ struct cave{
     : width(w), height(h), data(d){}
   std::list<point> find_neighbours(const point &p) const;
   uint iterative_flow();
+  uint dijsktra() const;
 };
 
 std::list<point> cave::find_neighbours(const point& p) const{
@@ -54,8 +56,6 @@ uint cave::iterative_flow(){
     std::unordered_set<point> nnodes; // new
     std::unordered_set<point> dnodes; // delete
     for(auto &p : onodes){
-      // std::cout << std::unitbuf << crisk << ':'
-      // 		<< '(' << p.first << ',' << p.second << ')' << ',';
       std::list<point> n = find_neighbours(p);
       const uint ns = n.size();
       n.remove_if([this, m, crisk, p, cnodes](auto &e){
@@ -65,18 +65,72 @@ uint cave::iterative_flow(){
       for(auto ne : n) {
 	nnodes.insert(ne);
 	uint via_p_risk = m[p] + data[ne.first][ne.second];
-	if(m.find(ne) == m.end()) m[ne] = via_p_risk;
+	if(m.find(ne) == m.end()) m[ne] = via_p_risk; // XXX:can use insert_or_assign
       }
       if(ns == n.size()) dnodes.insert(p);
     }
     for(auto p : dnodes) {onodes.erase(p); cnodes.insert(p);}
     for(auto p : nnodes) onodes.insert(p);
-    // for(auto p : m)
-    //   std:: cout << '[' << p.first.first << ',' << p.first.second
-    // 		 << ':' << p.second << ']';
-    std::cout << crisk << ' ' << onodes.size() << std::endl;
   }
   return crisk;
+}
+
+uint dis(const point &p){return p.first*p.first+p.second*p.second;}
+
+template <> struct std::less<std::pair<point, uint>> {
+  bool operator()(const std::pair<point, uint> & p1,
+		  const std::pair<point, uint> & p2) const{
+    if(p1.second == p2.second)
+      if(p1.first.first == p2.first.first)
+	return p1.first.second < p2.first.second;
+      else return p1.first.first < p2.first.first;
+    else return p1.second < p2.second;
+  };
+};
+
+template<typename T, class C = std::less<T>> struct pqueue : std::set<T, C>{
+  T top() const { return *this->begin();}
+  bool update(const T prev, const T current){
+    auto i = this->find(prev);
+    if(i == this->end()) return false;
+    else {
+      this->erase(i);
+      this->insert(current);
+      return true;
+    }
+  }
+};
+
+uint cave::dijsktra() const{
+  std::unordered_set<point> visited;
+  pqueue<std::pair<point, uint>> unvisited;
+  std::unordered_map<point, uint> m;
+  for(uint h = 0; h < height; h++)
+    for(uint w = 0; w < width; w++)
+      {
+	const std::pair<point, uint> entry = {{h, w}, -1};
+	unvisited.insert(entry);
+	m[{h, w}] = -1;
+      }
+  unvisited.update({{0, 0}, -1}, {{0, 0}, 0}); // set 0,0 risk to 0
+  m[{0, 0}] = 0; // initial position and risk
+  const point fi_p = {height-1, width-1};
+  while(!unvisited.empty()){ // I can also check if neighbours of fi_p are visited
+    point p = unvisited.top().first;
+    uint risk = unvisited.top().second;
+    std::list<point> n = find_neighbours(p);
+    for(const auto &np : n){
+      uint cell_risk = data[np.first][np.second];
+      uint nrisk = risk + cell_risk;
+      if(m[np] > nrisk) {
+	unvisited.update({np, m[np]}, {np, nrisk});
+	m[np] = nrisk;
+      }
+    }
+    unvisited.erase(unvisited.top());
+    visited.insert(p);
+  }
+  return m.at(fi_p);
 }
 
 template<class C, class T> struct cave read_cave(std::basic_istream<C, T>& s){
@@ -105,6 +159,21 @@ operator<<(std::basic_ostream<C, T>& s, const struct cave &c){
   return s;
 }
 
+struct cave expand_tile_cave(const struct cave &c, const uint scale){
+  const uint width = scale * c.width;
+  const uint height = scale * c.height;
+  std::vector<std::vector<uint>> data(height);
+  for(uint h = 0; h < height; h++)
+    data[h] = std::vector<uint>(width);
+  for(uint h = 0; h < height; h++)
+    for(uint w = 0; w < width; w++){
+      const uint offset = (h / c.height) + (w / c.width);
+      data[h][w] = c.data[h % c.height][w % c.width] + offset;
+      if(data[h][w] > 9) data[h][w] -= 9; 
+    }
+  return cave(width, height, data);
+}
+
 int main(int argc, char* argv[]){
   if(argc != 2){
     fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
@@ -113,11 +182,13 @@ int main(int argc, char* argv[]){
   std::ifstream s(argv[1]);
   struct cave c = read_cave(s);
   // std::cout << c.min_risk_path({c.height-1, c.width-1}, cache) << std::endl;
-  std::cout << c.iterative_flow() << std::endl;
+  std::cout << c.dijsktra() << std::endl;
+  struct cave cw = expand_tile_cave(c, 5);
+  std::cout << cw.dijsktra() << std::endl;
   return 0;
 }
 
 
 // Local Variables:
-// compile-command: "gcc -O2 -lstdc++ -Wall -Wextra -o day15 day15.cc"
+// compile-command: "gcc -ggdb -lstdc++ -Wall -Wextra -o day15 day15.cc"
 // End:

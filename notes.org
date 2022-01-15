@@ -116,11 +116,11 @@
   #+end_example
   
 * DONE Day 14
-  Solved the first part using a direct simulation. The second part requires more as the it is taking exponential time and memory. There are finite patterns here. Hence there will be big parts of the chain just repeating in time and space.
+  Solved the first part using a direct simulation. The second part requires more as it is taking exponential time and memory. There are finite patterns here. Hence there will be big parts of the chain just repeating in time and space.
   The polymer expansion is contained, i.e., an expansion only happens b/w two elements. Say there is a rule ~AB -> C~. Then ~AB~ transforms to ~ACB~. Thus if we take the whole string as a set of all successive two element pairs, then we can write this transformation as ~{AB}~ to ~{AC, CB}~. Since if only N elements are present we have to just keep track of N^2 pairs, we can iterate in constant space.
-  Ends of the polymer chain are proving a bit of problem for boundry conditions. I kept track of them and when took them into account when counting the characters.
+  Ends of the polymer chain are proving a bit of problem for boundry conditions. I kept track of them and took them into account when counting the characters.
 
-* Day 15
+* TODO Day 15
   This seems to be an optimal path finding problem. I am having trouble visualizing an algorithm since this is an undirected graph. I cannot enumerate all possible paths due to presence of cycles and just the size of the input. Without any backing(i.e., directed graph) a NxN path will have 2^N paths and for N=100, we have above 10^30 such paths. So for any case we need a heuristic to narrow the options for each point.
   Let O represent origin, i.e., top-left corner. Now let ~mrp : NxN ->N~ be the a function from the set of points to total risk which calculates the minimal risk of travelling from O to a point P.
   ~mrp(P) = min{mrp(Ni)+Ni|Ni is a neighbour of P}~
@@ -130,5 +130,7 @@
   - Inital value must be set or deal with somehow.
   - Should I queue the ends somehow?
 
-  <2022-01-11 Tue> I am not sure what exactly my ~iterative_flow~ algorithm is called. It must be a variant of some known algorithm. We start by checking the nodes reachable with smallest cost and start increasing the cost until we reach the required node. I got this working for the test case, but it is taking too long for the actual input. It could be faster by using hashed(Did not really improve things by much) sets and maps and with -O2 optimization instead of current debugging, but I suppose a better algorithm is needed here.
-  The ~iterative_flow~ will not work for the second case. I definitely need a good algorithm. There are several for finding shortest paths, I might as well try a few an analyze them.
+  <2022-01-11 Tue> I am not sure what exactly my ~iterative_flow~ algorithm is called. It is essentially a breadth-first search. We start by checking the nodes reachable with smallest cost and start increasing the cost until we reach the required node. I got this working for the test case, but it is taking too long for the actual input. It could be faster by using hashed(Did not really improve things by much) sets and maps and with -O2 optimization instead of current debugging, but I suppose a better algorithm is needed here.
+  The ~iterative_flow~ will not work for the second case. I definitely need a good algorithm. There are several for finding shortest paths, I might as well try a few and analyze them.
+** DONE Dijsktra
+   I am trying to represent unvisited nodes as a priority queue. The ~priority_queue~ in ~libstdc++~ does not have update function which is needed to update the cost of neighbouring nodes. I am trying to implement is using ~std::set~ with a custom comparision function. Now we can always get the top using ~*pq.begin()~, update is ~find~ and assignment, but will the set still be sorted after this update?
