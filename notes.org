@@ -134,3 +134,10 @@
   The ~iterative_flow~ will not work for the second case. I definitely need a good algorithm. There are several for finding shortest paths, I might as well try a few and analyze them.
 ** DONE Dijsktra
    I am trying to represent unvisited nodes as a priority queue. The ~priority_queue~ in ~libstdc++~ does not have update function which is needed to update the cost of neighbouring nodes. I am trying to implement is using ~std::set~ with a custom comparision function. Now we can always get the top using ~*pq.begin()~, update is ~find~ and assignment, but will the set still be sorted after this update?
+** Astar
+
+* TODO Day 16
+  A parsing problem on bit level.
+  - +I am using ~union~ non-trivially for the first time.+
+    + Using union in a recursive data structure is a lot more problematic.
+  Parsing is working for tests cases 1-5, but for 6, 7 and final cases I am somehow reaching EOF. 

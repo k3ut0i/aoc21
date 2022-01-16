@@ -119,7 +119,7 @@ uint cave::dijsktra() const{
     point p = unvisited.top().first;
     uint risk = unvisited.top().second;
     std::list<point> n = find_neighbours(p);
-    for(const auto &np : n){
+    for(const auto &np : n){ // have to ignore visited neighbours, but it is costly
       uint cell_risk = data[np.first][np.second];
       uint nrisk = risk + cell_risk;
       if(m[np] > nrisk) {
