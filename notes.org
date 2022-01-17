@@ -140,4 +140,6 @@
   A parsing problem on bit level.
   - +I am using ~union~ non-trivially for the first time.+
     + Using union in a recursive data structure is a lot more problematic.
-  Parsing is working for tests cases 1-5, but for 6, 7 and final cases I am somehow reaching EOF. 
+  - +Parsing is working for tests cases 1-5, but for 6, 7 and final cases I am somehow reaching EOF.+
+    + I did not count all the bits used accurately.
+  
