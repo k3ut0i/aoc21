@@ -18,7 +18,7 @@ R reduce(const std::list<T>& l, BiF f, UnF u){
   return v;
 }
 
-const static std::map<uint, std::function<ull(ull, ull)>> m = {
+const std::map<uint, std::function<ull(ull, ull)>> m = {
   {0, [](ull a, ull b){return a + b;}},
   {1, [](ull a, ull b){return a * b;}},
   {2, [](ull a, ull b){return a < b ? a : b;}},

@@ -136,10 +136,20 @@
    I am trying to represent unvisited nodes as a priority queue. The ~priority_queue~ in ~libstdc++~ does not have update function which is needed to update the cost of neighbouring nodes. I am trying to implement is using ~std::set~ with a custom comparision function. Now we can always get the top using ~*pq.begin()~, update is ~find~ and assignment, but will the set still be sorted after this update?
 ** Astar
 
-* TODO Day 16
+* DONE Day 16
   A parsing problem on bit level.
   - +I am using ~union~ non-trivially for the first time.+
     + Using union in a recursive data structure is a lot more problematic.
   - +Parsing is working for tests cases 1-5, but for 6, 7 and final cases I am somehow reaching EOF.+
     + I did not count all the bits used accurately.
-  
+
+* TODO Day 17      
+  - For any y-component of initial velocity yv, at time t=2*yv+1 we will be at y=0 and since the range will be below x-axis, we can always start simulating at this timepoint.
+  - I had to add ~.clangd~ config file for eglot to allow ~-std=c++17~ options for syntax checking.
+  - Only after doing some coding, I came to the conclusion that after reaching y=0, we need to ensure that we do not shoot past the target and that we need to optimize for highest y0. Since if -y0 < ymin, we will shoot past in one step we should take y0 <= -ymin. We can always choose x0 to be the bare minimum to get into the region.
+  - I still am not sure why the equality in ~y0 <= -1*ymin~ is should not be considered.
+  - Maybe because y-velocity at y=0, will be -y0-1 and not -y0?
+  The answer for the first part is just ~y0*(y0+1)/2~ where ~y0=-1*ymin-1~. For the second part
+  - Got to be extremely careful mixing integer and float operations by using ~t*((t-1)/2)~ instead of ~0.5*t*(t-1)~ I introduced a bug that took a lot of time to find.
+
+    <2022-01-18 Tue> Weeded out all inconsitencies for the example case, but still not giving me the correct answer for part2.
