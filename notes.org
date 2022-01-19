@@ -152,4 +152,11 @@
   The answer for the first part is just ~y0*(y0+1)/2~ where ~y0=-1*ymin-1~. For the second part
   - Got to be extremely careful mixing integer and float operations by using ~t*((t-1)/2)~ instead of ~0.5*t*(t-1)~ I introduced a bug that took a lot of time to find.
 
-    <2022-01-18 Tue> Weeded out all inconsitencies for the example case, but still not giving me the correct answer for part2.
+  <2022-01-18 Tue> Weeded out all inconsitencies for the example case, but still not giving me the correct answer for part2.
+  - I am missing something. I tried simulating ~will_strike_fs~ and somehow got few possible cases than direct calculation ~will_strike~.
+
+* TODO Day 18
+  I parsed the input data into a tree.
+  - Used ~shared_ptr~ for owning the sub-trees and a raw ~*~ pointer for keeping track of parents.
+  - We need to traverse the tree structure in depth first way, both forwards and backwards. So ideally an iterator will make writing down the ~explode~ code easier.
+    + I could not really write the iterator code, So the ~reduce~ code became exceedingly complicated. Now a few sums are working correctly and a few are not. Debugging process is also becoming complicated.

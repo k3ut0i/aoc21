@@ -91,6 +91,21 @@ bool will_strike(uint xv, int yv, const struct target& t){
   return(ira(txmin) && txmin >= tymin && txmin <= tymax)
     || (ira(txmax) && txmax >= tymin && txmax <= tymax);
 }
+/// full sim version
+std::optional<uint> will_strike_fs(uint xv, int yv, const struct target& t){
+  uint time = 0;
+  uint xpos = 0;
+  int ypos = 0;
+  while(!(t.xmin <= xpos && xpos <= t.xmax && t.ymin <= ypos && ypos <= t.ymax)){
+    if(xpos > t.xmax || ypos < t.ymin) return {};
+    xpos += xv;
+    ypos += yv;
+    if(xv > 0) xv--;
+    yv--;
+  }
+  return time;
+}
+
 uint count_negative(const struct target &t){
   uint count = 0;
   const uint xv_min = floor(sqrt(2*t.xmin+0.5) - 0.25);
@@ -99,6 +114,18 @@ uint count_negative(const struct target &t){
     for(int yv = t.ymin; yv <= 0; yv++)
       if(will_strike(xv, yv, t)){
 	// std::cout << xv << ',' << yv << std::endl;
+	count++;
+      }
+  return count;
+}
+
+uint count_all(const struct target &t){
+  uint count = 0;
+  const uint xv_min = floor(sqrt(2*t.xmin+0.5) - 0.25);
+
+  for(uint xv = t.xmax; xv >= xv_min; xv--)
+    for(int yv = t.ymin; yv <= (t.xmax+1)/2; yv++)
+      if(will_strike_fs(xv, yv, t)){
 	count++;
       }
   return count;
@@ -113,7 +140,7 @@ int main(int argc, char* argv[]){
   int ymin = atoi(argv[3]), ymax = atoi(argv[4]);
   const struct target t {xmin, xmax, ymin, ymax};
   auto sr = search_positive(t);
-  std::cout <<  sr.first << ' ' << sr.second + count_negative(t) << std::endl;
+  std::cout <<  sr.first << ' ' << sr.second + count_negative(t) << ' ' << count_all(t)<< std::endl;
   // std::cout << std::boolalpha << will_strike(9, 0, t) << std::endl;
   return 0;
 }
