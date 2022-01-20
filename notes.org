@@ -160,3 +160,9 @@
   - Used ~shared_ptr~ for owning the sub-trees and a raw ~*~ pointer for keeping track of parents.
   - We need to traverse the tree structure in depth first way, both forwards and backwards. So ideally an iterator will make writing down the ~explode~ code easier.
     + I could not really write the iterator code, So the ~reduce~ code became exceedingly complicated. Now a few sums are working correctly and a few are not. Debugging process is also becoming complicated.
+  - I could not work with ~union~, so I tried ~variant~ and this seems simpler to work with.
+  - In code for ~add~, I destroy the input data in the reduction process.
+    + This is okay for the first part, since we only ever use a number once to add to the accumulator.
+    + For part2 we need to try adding numbers multiple times. So we need to copy construct numbers deeply. I got away with just copying the current node and reusing the rest of the tree for part1.
+** TODO  DEEP COPY snailnum
+   Get a good solution instead of the hacky re-reading number strings.
