@@ -166,3 +166,8 @@
     + For part2 we need to try adding numbers multiple times. So we need to copy construct numbers deeply. I got away with just copying the current node and reusing the rest of the tree for part1.
 ** TODO  DEEP COPY snailnum
    Get a good solution instead of the hacky re-reading number strings.
+
+* TODO Day19
+  I used ~>>~ operator in parsing, by overloding it for a rvalue string.
+  - So now I can do ~stream >> "Number: " >> i~ to parse the string ~"Number: 27"~.
+  - Whitespace was making some problems which can be handled using ~noskipws~.
