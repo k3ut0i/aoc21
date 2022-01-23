@@ -171,3 +171,6 @@
   I used ~>>~ operator in parsing, by overloding it for a rvalue string.
   - So now I can do ~stream >> "Number: " >> i~ to parse the string ~"Number: 27"~.
   - Whitespace was making some problems which can be handled using ~noskipws~.
+
+  ~struct orientation~ is always w.r.t a existing system. It is represented as a triple of axes ~<a1, a2, a3>~. They are the axes along the ~<x, y, z>~, i.e., a1 is along x, a2 is along y, and a3 is along z.
+  I wrote a composition code for ~orientation~ but it was a bit hard to grasp as testing it is counter intutive. A point converted b/w one after the other will be w.r.t the final orientation, while which is converted directly will be w.r.t a combined one.
