@@ -59,7 +59,10 @@ operator<<(std::basic_ostream<C, T>& stream, const struct axis& a){
   }
   return stream;
 }
-
+bool operator<(const struct axis& a, const struct axis& b){
+  return a.alignment < b.alignment
+    || (a.alignment == b.alignment && a.direction < b.direction);
+}
 struct axis operator-(const struct axis a){
   struct axis r(a);
   r.direction = !r.direction;
@@ -196,15 +199,25 @@ orientation::invert(const std::tuple<T, T, T> &p) const{
   return r;
 }
 
+std::optional<struct orientation> find_orientation(const point &p, const point&pi){
+  for(const auto &o : all_o){
+    if (p == o.invert(pi)) return o;
+  }
+  return {};
+}
 bool operator==(const struct orientation& a, const struct orientation& b){
-  return a == b;
+  return a.axes == b.axes;
 }
 
 struct orientation operator*(const struct orientation& o1,
 			     const struct orientation& o2){
-  axis x, y, z;
-  std::tie(x, y, z) = o1.invert<axis>(o2.axes);
-  return orientation(x, y, z);
+  point pi = {1, 2, 3};
+  point p = o1.invert(o2.invert(pi));
+  auto omatch = find_orientation(p, pi);
+  if(omatch)
+    return omatch.value();
+  else
+    throw std::runtime_error("Could not find the composition of orientations.");
 }
 
 template<class C, class T> std::basic_ostream<C, T>&
@@ -213,6 +226,9 @@ operator<<(std::basic_ostream<C, T>& stream, const struct orientation& o){
   return stream << '[' << x << ',' << y << ',' << z << ']';
 }
 
+bool operator<(const struct orientation& o1, const struct orientation o2){
+  return o1.axes < o2.axes;
+}
 void test_orientation(){
   std::cout << "Testing all possible Orientations\n";
   if(!std::all_of(all_o.begin(),all_o.end(), [](auto a){return valid_axes(a.axes);}))
@@ -234,7 +250,13 @@ void test_orientation(){
 	    << b << " --> " << c << " also directly to: " << d << std::endl;
   std::cout << "Inverting points:\t" << a1 << " <-- "
 	    << b1 << " <-- " << c << " also directly to: " << ad << std::endl;
-  if(ad != a) throw "Composition of orientations is not working.";
+  if(ad != a)
+    throw std::runtime_error("Composition of orientations is not working.");
+  struct orientation s1 = {{axis::x, true}, {axis::y, false}, {axis::z, true}};
+  struct orientation s4f1 = {{axis::z, true}, {axis::x, false}, {axis::y, true}};
+  struct orientation s4 = {{axis::z, false}, {axis::x, true}, {axis::y, true}};
+  if(!(s4 == s1 * s4f1))
+    throw std::runtime_error("Composition of s4 relative to s1 is not s4 direct");
 }
 
 struct scanner{
@@ -267,10 +289,11 @@ obs_digest process_obs(const struct scanner& s){
 }
 
 std::optional<std::pair<point, struct orientation>>
-match_scanner(const obs_digest& a, const obs_digest& b){
+match_scanner(const struct scanner& as, const struct scanner& bs){
+  const obs_digest a = process_obs(as);
+  const obs_digest b = process_obs(bs);
   point a1, b1, a2, b2;
   uint da, db;
-  bool found = false;
   constexpr point dummy = {INTMAX_MAX, INTMAX_MAX, INTMAX_MAX}; // for searching
   std::list<std::pair<std::pair<point, point>,
 		      std::pair<point, point>>> possible_matches;
@@ -289,14 +312,14 @@ match_scanner(const obs_digest& a, const obs_digest& b){
   // For each possible match create an orientation and check for points that
   // satisfy the orientation and do not violate the constraints
   // If twelve points are common b/w a and b return True, else False.
+  std::set<std::pair<point, struct orientation>> ol;
   struct orientation o_p;
   point origin;
   for(auto x : possible_matches){
     std::tie(a1, a2) = x.first, std::tie(b1, b2) = x.second;
-
-    bool found_possible = false;
     // a1 = b1 and a2 = b2
-    for(const auto o : all_o){
+    for(const auto &o : all_o){
+      bool found_possible = false;
       if(a1 - o.invert(b1) == a2 - o.invert(b2)){
 	origin = a1 - o.invert(b1);
 	o_p = o;
@@ -308,20 +331,45 @@ match_scanner(const obs_digest& a, const obs_digest& b){
       }
       if(found_possible){
 	uint count = 0;
+	std::set<point> common1, common2;
 	for(auto y : possible_matches){
-	  if(count >= 12) goto FOUND_MATCH;
 	  std::tie(a1, a2) = y.first; std::tie(b1, b2) = y.second;
-	  if((a1 - o.invert(b1) == a2 - o.invert(b2)) ||
-	     (a1 - o.invert(b2) == a2 - o.invert(b1)))
+	  if((a1 - o_p.invert(b1) == a2 - o_p.invert(b2)) ||
+	     (a1 - o_p.invert(b2) == a2 - o_p.invert(b1))){
+	    common1.insert(a1);
+	    common1.insert(a2);
+	    common2.insert(b1);
+	    common2.insert(b2);
 	    count++;
+	  }
+	  if(count >= 12) {
+	    // std::cout << "Common points b/w scanners: " << as.id << ',' << bs.id << std::endl;
+	    // std::cout << "Viewed from : " << as.id << std::endl;
+	    // for(auto p : common1) std::cout << p << std::endl;
+	    // std::cout << "Viewed from : " << bs.id << std::endl;
+	    // for(auto p : common2) std::cout << p << std::endl;
+	    ol.insert({origin, o_p});
+	    goto FOUND;
+	  }
 	}
+	
+	// for(auto y : bs.obs){
+	//   if(as.obs.find(origin+o_p.invert(y)) != as.obs.end()) count++;
+	// }
+	// if(count >= 12) ol.insert({origin, o_p});
       }
     }
   }
+ FOUND:
+  if(ol.size()==1) return {{origin, o_p}};
+  else if(ol.size() > 1){
+    std::cout << "Matching: " << as.id << ',' << bs.id
+	      << "Possible Origins: ";
+    for(const auto& p : ol) std::cout << p.first << '[' << p.second << "], ";
+    std::cout << std::endl;
   return {};
-
- FOUND_MATCH:
-  return {{origin, o_p}};
+  }
+  else return {};
 }
 
 template<class C, class T> std::basic_istream<C, T>&
@@ -372,58 +420,114 @@ read_input(std::basic_istream<C, T>& s){
 }
 
 void test_matching(const std::list<struct scanner>& is){
-  auto s1 = *is.begin();
-  auto s2 = *std::next(is.begin());
-  auto od1 = process_obs(s1);
-  auto od2 = process_obs(s2);
+  for(const auto& s1: is)
+    for(const auto& s2: is)
+      if(s1.id != s2.id)
+	if(match_scanner(s1, s2))
+	  std::cout << "Matched: " << s1.id << ' ' << s2.id << std::endl;
+    
+  auto s0 = *is.begin();
+  auto s1 = *std::next(is.begin());
+
   std::cout << "Trying to match\n";
-  auto match = match_scanner(od1, od2);
+  auto match = match_scanner(s0, s1);
   if(match){
     point origin = match.value().first;
     struct orientation o = match.value().second;
     std::cout << "Origin: " << origin << " Orientation: " << o << std::endl;
-  }
-  else
-    throw std::runtime_error("Scanners 0 and 1 do not match");
+  } else throw std::runtime_error("Scanners 0 and 1 do not match");
+
+  auto s2 = *std::next(is.begin(), 2);
+  auto s4 = *std::next(is.begin(), 4);
+  auto match2 = match_scanner(s4, s2);
+  if(match2){
+    point origin = match2.value().first;
+    struct orientation o = match2.value().second;
+    std::cout << "Matched 4 and 2: Origin: " << origin << " Orientation: "
+	      << o << std::endl;
+  } else throw std::runtime_error("Scanners 0 and 1 do not match");
 }
 
 // Return the number of beacons and populate the connectivity of scanners in graph
-uint analyze_scanners(const std::list<struct scanner>& ss,
-		      std::map<uint, std::list<uint>>& graph)
+std::pair<uint, uint> analyze_scanners(const std::list<struct scanner>& ss,
+				       std::map<uint, std::list<uint>>& graph)
 {
   typedef struct scanner const* s_t;
   graph.clear();
   std::set<s_t> unreached;
   for(auto i = std::next(ss.begin()); i != ss.end(); i++) unreached.insert(&*i);
-  std::map<s_t, std::pair<point, struct orientation>> known =
+  std::map<s_t, std::pair<point, struct orientation>> m =
     {{&*ss.begin(), {{0, 0, 0}, orientation({axis::x, false},
 					    {axis::y, false},
 					    {axis::z, false})}}};
+  std::list<s_t> known = {&*ss.begin()};
   auto i = known.begin();
   while(!unreached.empty()){
-    s_t s = i->first;
-    point origin = i->second.first;
-    struct orientation o = i->second.second;
+    if(i == known.end()) break;
+      // throw std::runtime_error("Ran out of known before reaching all nodes ");
+    s_t s = *i;
     std::list<s_t> in_range;
     auto j = unreached.begin();
     while(j != unreached.end()){
-      auto match = match_scanner(process_obs(*s), process_obs(**j));
+      auto match = match_scanner(*s, **j);
+      auto next_j = std::next(j);
       if(match) {
-	known[*j] = match.value();
+	point r_origin = match.value().first;
+	struct orientation r_o = match.value().second;
+	point s_origin = m[s].first;
+	struct orientation s_o = m[s].second;
+	m[*j] = {s_origin + s_o.invert(r_origin),s_o*r_o};
+	known.push_back(*j);
 	unreached.erase(j);
       }
-      j++;
+      j = next_j;
     }
     i++;
   }
+  // std::set<std::pair<uint, point>> beacon;
   std::set<point> beacon;
   for(const auto & s : ss){
     for(auto ob : s.obs){
-      point s_origin = known[&s].first;
-      struct orientation s_o = known[&s].second;
-      beacon.insert(s_o.invert(ob)+s_origin);
+      point s_origin = m[&s].first;
+      struct orientation s_o = m[&s].second;
+      point p = s_o.invert(ob)+s_origin;
+      beacon.insert(p);
+      // beacon.insert({s.id, p});
     }
   }
+  uint max_dis = 0;
+  constexpr static auto abs_f = [](int a)->uint{return a > 0 ? a : -a;};
+  constexpr static auto man_dis_f = [](point a, point b)->uint {
+    return 
+      abs_f(std::get<0>(a)-std::get<0>(b))+
+      abs_f(std::get<1>(a)-std::get<1>(b))+
+      abs_f(std::get<2>(a)-std::get<2>(b))
+      ;
+  };
+  for(auto i = ss.begin(); i != ss.end(); i++)
+    for(auto j = std::next(i); j != ss.end(); j++){
+      point oi = m[&*i].first;
+      point oj = m[&*j].first;
+      uint d = man_dis_f(oi, oj);
+      if(d > max_dis) max_dis = d;
+    }
+  // for(const auto &pi : beacon)
+  //   std::cout << pi.first << ' ' << pi.second << std::endl;
+  return {beacon.size(), max_dis};
+}
+
+void test_o_com(){
+  struct orientation s1 = {{axis::x, true}, {axis::y, false}, {axis::z, true}};
+  struct orientation s4f1 = {{axis::z, true}, {axis::x, false}, {axis::y, true}};
+  struct orientation s4 = {{axis::z, false}, {axis::x, true}, {axis::y, true}};
+  point a = {1, 2, 3};
+  point b = s4f1.invert(a);
+  point c = s1.invert(b);
+  point d = (s1 * s4f1).invert(a);
+  std::cout << '[' << a << "] s4f1-> [" << b << "] s1-> [" << c
+	    << "] direct s4: [" << d << ']' << std::endl;
+  if(!(s4 == s1 * s4f1))
+    throw std::runtime_error("Composition of orientations not working.");
 }
 
 int main(int argc, char* argv[0]){
@@ -433,8 +537,12 @@ int main(int argc, char* argv[0]){
   }
   std::ifstream s(argv[1]);
   const std::list<struct scanner> is = read_input(s);
-  test_matching(is);
+  std::map<uint, std::list<uint>> graph;
+  // test_matching(is);
+  // test_o_com();
   // test_orientation();
+  auto ans = analyze_scanners(is, graph);
+  std::cout << "Beacons: " << ans.first << " Max dis: " << ans.second << std::endl;
   return 0;
 }
 

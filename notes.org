@@ -174,3 +174,9 @@
 
   ~struct orientation~ is always w.r.t a existing system. It is represented as a triple of axes ~<a1, a2, a3>~. They are the axes along the ~<x, y, z>~, i.e., a1 is along x, a2 is along y, and a3 is along z.
   I wrote a composition code for ~orientation~ but it was a bit hard to grasp as testing it is counter intutive. A point converted b/w one after the other will be w.r.t the final orientation, while which is converted directly will be w.r.t a combined one.
+
+  <2022-01-24 Mon> There is something buggy about composition of the Orientations. [-x, y, -z] * [-z, x, -y] became [z, x, y] WHY?
+  The only problem seems to be with scanner 2. I am not exactly sure what is going on here.
+  <2022-01-25 Tue> I need to make sure interleaved sequence of translations and rotations are properly working with my current code. I need to comeup with a few test cases.
+
+  Finally confirmed that the orientation of the scanner 4 is by itself wrong. And thus the composition of orientations is not working. _HACKY SOLUTION_: I did not write an analytic function to calculate the composition but just searched for the one that does the correct direct inversion from the list of all posssible orientations ~all_o~.
