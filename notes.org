@@ -167,7 +167,7 @@
 ** TODO  DEEP COPY snailnum
    Get a good solution instead of the hacky re-reading number strings.
 
-* TODO Day19
+* DONE Day19
   I used ~>>~ operator in parsing, by overloding it for a rvalue string.
   - So now I can do ~stream >> "Number: " >> i~ to parse the string ~"Number: 27"~.
   - Whitespace was making some problems which can be handled using ~noskipws~.
@@ -180,3 +180,7 @@
   <2022-01-25 Tue> I need to make sure interleaved sequence of translations and rotations are properly working with my current code. I need to comeup with a few test cases.
 
   Finally confirmed that the orientation of the scanner 4 is by itself wrong. And thus the composition of orientations is not working. _HACKY SOLUTION_: I did not write an analytic function to calculate the composition but just searched for the one that does the correct direct inversion from the list of all posssible orientations ~all_o~.
+
+* DONE Day20
+  While technically size of the image is infinite, if the image enhancement does not affect the pixels at a distance we can ignore them.
+  Pixels far away are not lit and hence correspond to the algorithm index of zero. In test case they remain unaffected as the algorithm keeps them unlit. In the case of actual input, these are lit. But when the enhancement is applied again the index is 511 and they are unlit again. Thus we only need to consider the pixels of that border the image as they are the only ones affected. The image grows by 2x2 every enhancement.
