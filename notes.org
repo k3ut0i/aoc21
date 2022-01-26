@@ -184,3 +184,8 @@
 * DONE Day20
   While technically size of the image is infinite, if the image enhancement does not affect the pixels at a distance we can ignore them.
   Pixels far away are not lit and hence correspond to the algorithm index of zero. In test case they remain unaffected as the algorithm keeps them unlit. In the case of actual input, these are lit. But when the enhancement is applied again the index is 511 and they are unlit again. Thus we only need to consider the pixels of that border the image as they are the only ones affected. The image grows by 2x2 every enhancement.
+
+* Day21
+  - I used a ~static~ variable in the function ~det_dice~.
+
+  <2022-01-25 Tue> Something weird going on in either update_mv or reduce_mv. The are a lot more universes expanded than either won. Some reduction or expansion sum is wrong.
